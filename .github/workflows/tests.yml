@@ -1,0 +1,82 @@
+name: Tests
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+
+jobs:
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libboost-all-dev clang-18
+
+      - name: Configure with ASAN
+        run: |
+          cmake -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCF_BUILD_TESTS=ON \
+            -DCF_ENABLE_ASAN=ON \
+            -DCMAKE_CXX_COMPILER=clang++-18
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Run tests
+        run: |
+          cd build
+          ctest --output-on-failure --parallel 4
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: build/Testing/
+
+  coverage:
+    name: Code Coverage
+    runs-on: ubuntu-24.04
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake ninja-build libboost-all-dev gcovr clang-18
+
+      - name: Configure with coverage
+        run: |
+          cmake -B build \
+            -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCF_BUILD_TESTS=ON \
+            -DCMAKE_CXX_FLAGS="--coverage" \
+            -DCMAKE_CXX_COMPILER=clang++-18
+
+      - name: Build & Test
+        run: |
+          cmake --build build --parallel
+          cd build && ctest --output-on-failure
+
+      - name: Generate coverage report
+        run: |
+          gcovr --xml-pretty \
+            --exclude-unreachable-branches \
+            --print-summary \
+            -o coverage.xml \
+            --root .
+
+      - name: Upload to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage.xml
