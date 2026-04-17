@@ -4,87 +4,130 @@
 #include <memory>
 #include <filesystem>
 #include <string>
+#include <functional>
 
 #include "IApplication.hh"
 #include "Container.hh"
 #include "../configuration/Repository.hh"
 #include "../configuration/EnvParser.hh"
+#include "ServiceRegistry.hh"
+#include "../logger/Logger.hh"
+
+
+
+namespace Tufan::Services
+{
+    class ServiceManager;
+    class ServiceProvider;
+}
 
 
 namespace Tufan::Foundation
 {
     class Application final : public IApplication
     {
-    public:
-        [[nodiscard]]
-        static std::shared_ptr<Application> create(std::filesystem::path basePath = std::filesystem::current_path());
+        public:
+            [[nodiscard]]
+            static std::shared_ptr<Application>create(std::filesystem::path basePath = std::filesystem::current_path());
 
-        explicit Application(std::filesystem::path basePath);
-        ~Application() override;
+            explicit Application(std::filesystem::path basePath);
+            ~Application() override;
 
-        Application(const Application&) = delete;
-        Application& operator=(const Application&) = delete;
+            Application(const Application&) = delete;
+            Application& operator=(const Application&) = delete;
+            void bootstrap() override;
+            void run() override;
+            void terminate() override;
 
-        void bootstrap() override;
-        void run() override;
-        void terminate() override;
+            [[nodiscard]]
+            std::string_view name() const noexcept override;
+            [[nodiscard]]
+            std::string_view version() const noexcept override;
+            [[nodiscard]]
+            std::string_view environment() const noexcept override;
+            [[nodiscard]]
+            std::filesystem::path basePath() const noexcept override;
 
-        [[nodiscard]]
-        std::string_view  name() const noexcept override;
-        [[nodiscard]]
-        std::string_view  version() const noexcept override;
-        [[nodiscard]]
-        std::string_view  environment() const noexcept override;
-        [[nodiscard]]
-        std::filesystem::path basePath() const noexcept override;
+            [[nodiscard]]
+            bool isBooted() const noexcept override;
+            [[nodiscard]]
+            bool isRunning() const noexcept override;
+            [[nodiscard]]
+            bool isDebug() const noexcept override;
+            [[nodiscard]]
+            bool isTesting() const noexcept override;
+            [[nodiscard]]
+            bool isProduction() const noexcept override;
 
-        [[nodiscard]]
-        bool isBooted() const noexcept override;
-        [[nodiscard]]
-        bool isRunning() const noexcept override;
-        [[nodiscard]]
-        bool isDebug() const noexcept override;
-        [[nodiscard]]
-        bool isTesting() const noexcept override;
-        [[nodiscard]]
-        bool isProduction() const noexcept override;
+            [[nodiscard]]
+            Foundation::Container& container() noexcept;
+            [[nodiscard]]
+            Container::ModuleRegistry& registry() noexcept;
+            [[nodiscard]]
+            Configuration::Repository&  config() noexcept;
+            [[nodiscard]]
+            Logger::ILogger& logger() noexcept;
+            [[nodiscard]]
+            Services::ServiceManager&   services() noexcept;
 
-        [[nodiscard]]
-        Container::Container& container() noexcept;
+            template<typename Provider, typename... Args> Application& register_(Args&&... args);
 
-        [[nodiscard]]
-        Configuration::Repository& config() noexcept;
+            Application& onBooting(std::function<void()> callback);
+            Application& onBooted(std::function<void()>  callback);
 
-        template<typename Provider, typename... Args> Application& provide(Args&&... args);
-        Application& onBooting(std::function<void()> callback);
-        Application& onBooted(std::function<void()> callback);
+            [[nodiscard]]
+            std::filesystem::path path(std::string_view relative) const;
 
-        [[nodiscard]]
-        std::filesystem::path path(std::string_view relative) const;
+            [[nodiscard]]
+            static std::string_view frameworkVersion() noexcept;
 
-        [[nodiscard]]
-        static std::string_view frameworkVersion() noexcept;
+        private:
+            void loadEnvironment();
+            void loadConfiguration();
+            void registerBaseBindings();
+            void setupLogger();
 
-    private:
-        void loadEnvironment();
-        void loadConfiguration();
-        void registerBaseBindings();
-        void registerProviders();
-        void bootProviders();
+            std::filesystem::path basePath_;
+            std::string name_
+            {
+                "CyberForge App"
+            };
+            std::string version_
+            {
+                "0.1.0"
+            };
+            std::string environment_
+            {
+                "production"
+            };
 
-        std::filesystem::path basePath_;
-        std::string name_ { "CyberForge App" };
-        std::string version_ { "0.1.0" };
-        std::string environment_ { "production" };
-        bool booted_ { false };
-        bool running_ { false };
-        bool debug_ { false };
-        Container::Container container_;
-        Configuration::Repository config_;
-        std::vector<std::unique_ptr<Services::IServiceProvider>> providers_;
-        std::vector<std::function<void()>> bootingCallbacks_;
-        std::vector<std::function<void()>> bootedCallbacks_;
-    };
+            bool booted_
+            {
+                false
+            };
+            bool running_
+            {
+                false
+            };
+            bool debug_
+            {
+                false
+            };
+
+            Container::Container container_;
+            Container::ModuleRegistry registry_;
+            Configuration::Repository config_;
+            std::unique_ptr<Logger::Logger> logger_;
+            std::unique_ptr<Services::ServiceManager> serviceManager_;
+            std::vector<std::function<void()>> bootingCallbacks_;
+            std::vector<std::function<void()>> bootedCallbacks_;
+        };
+
+    template<typename Provider, typename... Args> Application& Application::register_(Args&&... args)
+    {
+        services().add<Provider>(std::forward<Args>(args)...);
+        return *this;
+    }
 }
 
 //

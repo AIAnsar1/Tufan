@@ -84,7 +84,33 @@ add_executable(Tufan main.cc
         config/security.cc
         config/logging.cc
         engine/testing/unit/configuration/RepositoryTest.cc
-        engine/testing/unit/foundation/ApplicationTest.cc)
+        engine/testing/unit/foundation/ApplicationTest.cc
+        engine/foundation/ServiceRegistry.hh
+        engine/foundation/ServiceRegistry.hh
+        engine/logger/Logger.hh
+        engine/logger/Logger.cc
+        engine/exceptions/Exceptions.hh
+        engine/exceptions/Handler.hh
+        engine/exceptions/Handler.cc
+        engine/console/Command.hh
+        engine/console/Kernel.hh
+        engine/console/Parser.hh
+        engine/console/Parser.cc
+        engine/console/Kernel.cc
+        engine/facades/Facade.hh
+        engine/facades/Config.hh
+        engine/facades/Registry.hh
+        engine/facades/Logger.hh
+        engine/testing/TestCase.hh
+        engine/testing/unit/foundation/RegistryTest.cc
+        engine/services/ServiceProvider.hh
+        engine/services/ServiceProvider.cc
+        engine/services/ServiceManager.hh
+        engine/services/ServiceManager.cc
+        engine/logger/LoggerServiceProvider.hh
+        engine/foundation/ScannerServiceProvider.hh
+        engine/foundation/ReportServiceProvider.hh
+        engine/testing/unit/foundation/ServiceProviderTest.cc)
 target_link_libraries(Tufan PRIVATE TufanCore Boost::program_options)
 add_subdirectory(src/modules/scanner)
 add_subdirectory(src/modules/analyzer)

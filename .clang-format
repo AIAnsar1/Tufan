@@ -1,0 +1,71 @@
+Language: Cpp
+Standard: c++23
+BasedOnStyle: LLVM
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+ContinuationIndentWidth: 4
+ConstructorInitializerIndentWidth: 4
+NamespaceIndentation: None
+IndentCaseLabels: true
+IndentPPDirectives: BeforeHash
+BreakBeforeBraces: Attach
+AllowShortBlocksOnASingleLine: Never
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLambdasOnASingleLine: All
+AllowShortLoopsOnASingleLine: false
+ColumnLimit: 100
+ReflowComments: true
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments:
+  Enabled:        false
+AlignConsecutiveDeclarations:
+  Enabled:        false
+AlignOperands:    Align
+AlignTrailingComments:
+  Kind:           Always
+  OverEmptyLines: 1
+
+SpaceAfterCStyleCast: false
+SpaceAfterLogicalNot: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeCtorInitializerColon: true
+SpaceBeforeInheritanceColon: true
+SpaceBeforeParens: ControlStatements
+SpaceBeforeRangeBasedForLoopColon: true
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 2
+SortIncludes:  CaseSensitive
+IncludeBlocks: Regroup
+
+IncludeCategories:
+  - Regex: '"kernel/.*"'
+    Priority: 1
+  - Regex: '"engine/.*"'
+    Priority: 2
+  - Regex: '<boost/.*>'
+    Priority: 3
+  - Regex: '<gtest/.*>|<gmock/.*>'
+    Priority: 4
+  - Regex: '<[a-z_]+>'
+    Priority: 5
+  - Regex:  '.*'
+    Priority: 6
+
+AlwaysBreakTemplateDeclarations: Yes
+SpaceAfterTemplateKeyword: true
+CompactNamespaces: false
+FixNamespaceComments: true
+Cpp11BracedListStyle: true
+DerivePointerAlignment: false
+PointerAlignment: Left
+ReferenceAlignment: Left
+QualifierAlignment: Left
+BreakConstructorInitializers: BeforeComma
+PackConstructorInitializers: Never
+EmptyLineBeforeAccessModifier: LogicalBlock
+EmptyLineAfterAccessModifier:  Never
+SeparateDefinitionBlocks: Always
